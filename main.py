@@ -5,25 +5,27 @@ import uuid
 url = 'https://ai.fakeopen.com/api/conversation'
 
 headers = {
-    "Authorization": "Bearer 这段换成自己的accesstoken",
+    "Authorization": "Bearer <Your token>",
     "Content-Type": "application/json"
 }
 
-unique_id = str(uuid.uuid4())
+parent_message_id = str(uuid.uuid4())  # 初始parent_message_id
 
 try:
     while True:
-        part = input("你：")
+        part = input("User：")
         
         if part.lower() in ['exit', 'quit', 'bye']:
-            print("再见！")
+            print("Seeya！")
             break
+        
+        message_id = str(uuid.uuid4())
         
         data = {
             "action": "next",
             "messages": [
                 {
-                    "id": unique_id,
+                    "id": message_id,
                     "role": "user",
                     "author": {
                         "role": "user",
@@ -35,7 +37,7 @@ try:
                 }
             ],
             "model": "gpt-4",
-            "parent_message_id": unique_id,
+            "parent_message_id": parent_message_id,
         }
         
         parts = None
@@ -53,13 +55,14 @@ try:
                             if 'message' in message and 'content' in message['message'] and 'parts' in message['message']['content']:
                                 parts = message['message']['content']['parts']
                         except json.JSONDecodeError:
-                            print(f"无法解析内容为 JSON: {content}")
+                            pass  # 忽略JSON解析错误
         
         if parts is not None:
             response_part = " ".join(parts)
-            print(f"机器人：{response_part}")
+            print(f"Bot：{response_part}")
+            parent_message_id = message_id
         else:
-            print("机器人没有回应")
+            print("Bot didn't respond. Please try again.")
 
 except KeyboardInterrupt:
-    print("\n对话已中断。再见！")
+    print("\nByebye")
